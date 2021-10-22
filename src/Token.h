@@ -5,15 +5,16 @@
 
 class Token {
 	/// token type
-	TokenKind kind;
+	TokenKind kind = TokenKind::UNKNOWN;
 
 	/// Location of the token
-	unsigned int row, col;
+	unsigned int row = 1, col = 1;
 
 	/// token data
 	std::string data;
 
 public:
+	Token(){}
 	Token(TokenKind k, int row, int col, std::string data) : kind(k), row(row), col(col), data(data) {}
 	TokenKind get_kind() { return kind; }
 	unsigned int get_row() { return row; }

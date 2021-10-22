@@ -42,6 +42,9 @@ public:
 
 	/// check curChar type
 	bool is_space() { return curChar == ' '; }
+	
+	/// split the text
+	std::vector<Token> get_token_list();
 
 	/// test function
 	void test() {

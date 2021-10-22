@@ -1,7 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <assert.h>
 
 #include "Lexer.h"
+#include "grammer/CFG.h"
+#include "grammer/LL1.h"
+
 int main(int argc, char* argv[]) {
 	std::ifstream in("..\\..\\src\\test.txt");
 	if (!in.is_open())
@@ -10,6 +15,7 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 	Lexer lex(in);
-	lex.test();
+	LL1 l;
+	l.test();
 	return 0;
 }

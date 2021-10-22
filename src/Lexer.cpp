@@ -8,6 +8,17 @@ void Lexer::next() {
 	}
 }
 
+std::vector<Token> Lexer::get_token_list() {
+	std::vector<Token> v;
+	while (true) {
+		auto tk = get_next_token();
+		v.push_back(tk);
+		if (tk.get_kind() == TokenKind::E_O_F)
+			break;
+	}
+	return v;
+}
+
 Token Lexer::get_number() {
 	std::string res = "";
 	int stCol = col;
@@ -73,7 +84,7 @@ Token Lexer::get_next_token() {
 		}
 		else if (curChar == '}') {
 			next();
-			return Token(TokenKind::R_BRACE, row, col, "{");
+			return Token(TokenKind::R_BRACE, row, col, "}");
 		}
 		else if (curChar == ',') {
 			next();
@@ -88,9 +99,13 @@ Token Lexer::get_next_token() {
 			col = 0;
 			next();
 		}
+		else if (curChar == '#') {
+			next();
+			return Token(TokenKind::E_O_F, row, col, "#");
+		}
 		else {
 			std::cerr << "unknown character:" << curChar << ";" << std::endl;
 		}
 	}
-	return Token(TokenKind::E_O_F, row, col, "EOF");
+	return Token(TokenKind::E_O_F, row, col, "#");
 }
