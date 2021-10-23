@@ -1,7 +1,8 @@
 #pragma once
-#include "TokenKinds.h"
-#include <json/json.h>
 
+#include "json/CJsonObject.hpp"
+#include "grammer/CFG.h"
+#include "TokenKinds.h"
 
 class Token {
 	/// token type
@@ -20,7 +21,36 @@ public:
 	unsigned int get_row() { return row; }
 	unsigned int get_col() { return col; }
 	std::string get_data() { return data; }
+	
+	/// transfer to a symbol type
+	Grammer::Symbol get_name() {
+		using Grammer::Symbol;
+		if (is(TokenKind::INT))
+			return Symbol("num");
+		if (is(TokenKind::IDENTIFER))
+			return Symbol("identifier");
+		return Symbol(data);
+	}
+	
 	void setKind(TokenKind k) { kind = k; }
+
+	bool operator == (Grammer::Symbol& rhs) {
+		if (rhs.get_type() == Grammer::SymbolType::N_TERMINAL)
+			return false;
+		
+		if (rhs.get_name() == "num") {
+			return is(TokenKind::INT);
+		}
+
+		if (rhs.get_name() == "identifier") {
+			return is(TokenKind::IDENTIFER);
+		}
+
+		return rhs.get_name() == data;
+	}
+	bool operator != (Grammer::Symbol rhs) {
+		return !(*this == rhs);
+	}
 
 	/// type judge
 	bool is(TokenKind k) { return kind == k; }
@@ -35,19 +65,12 @@ public:
 
 	/// temporaly use this
 	std::string json_print() {
-		Json::StreamWriterBuilder writerBuilder;
-		std::ostringstream os;
-
-		Json::Value rootValue = Json::objectValue;
-		rootValue["type"] = "Identifer";
-		rootValue["val"] = get_data();
-		rootValue["position"] = Json::objectValue;
-		rootValue["position"]["col"] = get_col();
-		rootValue["position"]["row"] = get_row();
-
-		std::unique_ptr<Json::StreamWriter> jsonWriter(writerBuilder.newStreamWriter());
-		jsonWriter->write(rootValue, &os);
-
-		return os.str();
+		neb::CJsonObject json;
+		json.Add("type", "haha");
+		json.Add("val", get_data());
+		json.AddEmptySubObject("pos");
+		json["pos"].Add("row", get_row());
+		json["pos"].Add("col", get_col());
+		return json.ToFormattedString();
 	}
 };

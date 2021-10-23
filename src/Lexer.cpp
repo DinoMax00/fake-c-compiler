@@ -36,7 +36,13 @@ Token Lexer::get_identifier() {
 		res += curChar;
 		next();
 	}
-	return Token(TokenKind::INT, row, stCol, res);
+	bool flg = false;
+	for (int i = 0; i < keywordsNum; ++i) {
+		if (keywords[i] == res)
+			flg = true;
+	}
+	if (flg) return Token(TokenKind::KEYWORDS, row, stCol, res);
+	return Token(TokenKind::IDENTIFER, row, stCol, res);
 }
 
 Token Lexer::get_next_token() {

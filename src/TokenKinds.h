@@ -1,5 +1,10 @@
 #pragma once
 
+#include <string>
+
+constexpr int keywordsNum = 6;
+static std::string keywords[keywordsNum] = {"if", "else", "while", "return", "int", "void", };
+
 enum class TokenKind : unsigned short {
 	/// no type
 	UNKNOWN, 
@@ -11,6 +16,7 @@ enum class TokenKind : unsigned short {
 	ELSE,
 	RETURN,
 
+	KEYWORDS, // if while ...
 	/// identifer
 	IDENTIFER,
 

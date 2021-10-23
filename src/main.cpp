@@ -4,8 +4,8 @@
 #include <assert.h>
 
 #include "Lexer.h"
-#include "grammer/CFG.h"
 #include "grammer/LL1.h"
+#include "Parser.h"
 
 int main(int argc, char* argv[]) {
 	std::ifstream in("..\\..\\src\\test.txt");
@@ -15,7 +15,12 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 	Lexer lex(in);
+	lex.test();
 	LL1 l;
-	l.test();
+	// l.test();
+	Parser par(lex.get_token_list());
+	par.build_ast_tree();
+	std::cout << "success!" << std::endl;
+	par.json_print();
 	return 0;
 }

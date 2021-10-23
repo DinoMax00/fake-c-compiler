@@ -48,12 +48,18 @@ std::set<Symbol> LL1::get_first_set(Symbol sym) {
 }
 
 std::set<Symbol> LL1::get_follow_set(Symbol sym) {
+	followRecord.clear();
+	followRecord[sym] = true;
+	return follow_set(sym);
+}
+
+std::set<Symbol> LL1::follow_set(Symbol sym) {
 	std::set<Symbol> followSet;
 
 	/// rule1:
 	/// if sym is the start symbol, inset '$' to the set
 	if (sym == startSymbol) {
-		followSet.insert(Symbol("$"));
+		followSet.insert(Symbol("#"));
 	}
 
 	for (auto pro : productions) {
@@ -70,7 +76,7 @@ std::set<Symbol> LL1::get_follow_set(Symbol sym) {
 					/// avoid endless loop
 					if (!followRecord[pro->get_header()]) {
 						followRecord[pro->get_header()] = true;
-						auto s = get_follow_set(pro->get_header());
+						auto s = follow_set(pro->get_header());
 						followSet.insert(s.begin(), s.end());
 					}
 					continue;
@@ -87,11 +93,48 @@ std::set<Symbol> LL1::get_follow_set(Symbol sym) {
 
 				if (epsilon) {
 					followRecord[body[i + 1]] = true;
-					fSet = get_follow_set(body[i + 1]);
+					fSet = follow_set(body[i + 1]);
 					followSet.insert(fSet.begin(), fSet.end());
 				}
 			}
 		}
 	}
 	return followSet;
+}
+
+std::map<Symbol, std::map<Symbol, Production> > LL1::get_parser_table() {
+	remove_recursive();
+	std::map<Symbol, std::map<Symbol, Production> > mp;
+	for (auto pro : initialProductions) {
+		
+		for (auto body : pro->get_bodys()) {
+			bool epsilon = false;
+			/// A->B
+			/// link A with first(B)
+			for (auto sym : body) {
+				auto firstSet = get_first_set(sym);
+				epsilon = false;
+				for (auto it : firstSet) {
+					if (it == "¦Å") {
+						epsilon = true;
+						continue;
+					}
+					mp[pro->get_header()][it] = *pro;
+				}
+
+				if (!epsilon) break;
+			}
+			/// A->B
+			/// if B=>epsilon
+			/// link A with follow(A)
+			if (epsilon) {
+				auto followSet = get_follow_set(pro->get_header());
+
+				for (auto it : followSet) {
+					mp[pro->get_header()][it] = *pro;
+				}
+			}
+		}
+	}
+	return mp;
 }

@@ -44,8 +44,14 @@ namespace Grammer {
 		bool operator == (const Symbol& rhs) const {
 			return name == rhs.name;
 		}
+		bool operator == (const std::string& rhs) const {
+			return name == rhs;
+		}
 		bool operator != (const Symbol& rhs) const {
 			return name != rhs.name;
+		}
+		bool operator != (const std::string& rhs) const {
+			return name != rhs;
 		}
 		/// needed to use set
 		bool operator < (const Symbol& rhs) const {
@@ -94,11 +100,11 @@ namespace Grammer {
 		std::set<Symbol> terminalSet; // {a,b}
 		std::set<Symbol> nonTerminalSet; // {S, A}
 		std::vector<shared_ptr<Production> > productions; // {S->Ab, A->a}
+		std::vector<shared_ptr<Production> > initialProductions; 
 		Symbol startSymbol; // {S}
 
 	public:
 		CFG();
-
 		/// print the grammer
 		friend std::ostream& operator <<(std::ostream& out, const CFG& cfg);
 

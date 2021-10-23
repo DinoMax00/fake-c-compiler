@@ -49,10 +49,11 @@ public:
 	/// test function
 	void test() {
 		std::cout << text << std::endl;
-		while (true) {
-			Token t = get_next_token();
-			std::cout << t.json_print() << std::endl;
-			if (t.get_data() == "EOF") return;
-		}
+		//auto lst = get_token_list();
+		//for (auto t: lst) {
+		//	std::cout << t.json_print() << std::endl;
+		//	if (t.get_data() == "#") return;
+		//}
+
 	}
 };

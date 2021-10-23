@@ -17,10 +17,14 @@ namespace Grammer {
 
 			shared_ptr<Production> pPtr = std::make_shared<Production>();
 			ProductionBody pb;
+
+			shared_ptr<Production> ipPtr = std::make_shared<Production>();
+			ProductionBody ipb;
 			
-			assert(pPtr);
+			assert(pPtr && ipPtr);
 
 			pPtr->set_header(Symbol(arr[0]));
+			ipPtr->set_header(Symbol(arr[0]));
 
 			for (int j = 0; j < tokenNum; ++j) {
 				assert(arr[j].length() > 0);
@@ -34,14 +38,20 @@ namespace Grammer {
 				else
 					nonTerminalSet.insert(sym);
 
-				if (j)
+				if (j) {
 					pb.push_back(sym);
-				else
+					ipb.push_back(sym);
+				}
+				else {
 					pPtr->set_header(sym);
+					ipPtr->set_header(sym);
+				}
 			}
 			pPtr->append_body(pb);
+			ipPtr->append_body(ipb);
 
 			productions.push_back(pPtr);
+			initialProductions.push_back(ipPtr);
 		}
 		merge_productions();
 	}
