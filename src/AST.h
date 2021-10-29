@@ -25,7 +25,7 @@ namespace AST {
 				for (int i = childs.size() - 1; i >= 0; --i) {
 					neb::CJsonObject j(childs[i]->json_print());
 					if (childs[i]->childs.size()) json.Add(childs[i]->type.get_name() + ": ", j);
-					else json.Add(childs[i]->type.get_name() + ": ", childs[i]->json_print());
+					else json.Add(childs[i]->type.get_name(), childs[i]->json_print());
 				}
 			}
 			else return "";

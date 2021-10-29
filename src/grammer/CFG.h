@@ -17,6 +17,12 @@ namespace Grammer {
 		N_TERMINAL
 	};
 
+	/// Symbol类
+	/// 产生式里所有的符号都是这个类型，通过两个get方法得到他的名字和类型。
+	/// 如果产生式名字是<xxx> 那么就认为是非终结符
+	/// 所有产生式都在GrammerRules.h里
+	/// 重载了==和!=运算符，可以直接和Symbol或者string比较是否相等
+
 	/// grammer symbols
 	class Symbol {
 		std::string name;
@@ -59,8 +65,15 @@ namespace Grammer {
 		}
 	};
 
+	/// 这个是一条产生式的右半部分，就是一系列Symbol组成的vector
+
 	/// rhs of a production
 	typedef std::vector<Symbol> ProductionBody;
+
+	/// 产生式类型
+	/// 包括左半部分header和右半部分
+	/// 因为之后合并的时候会有A->abc|ef|gf, 一个A能推导出来多个右半部分，所以用vector存这些右半部分(bodys)
+	/// 重载了输出运算符，所以可以直接cout << xxx; 用来debug
 
 	/// A->abc
 	class Production {
@@ -93,6 +106,12 @@ namespace Grammer {
 		}
 	};
 
+	/// 上下文无关文法
+	/// 包括终结符 非终结符 产生式 开始的符号
+	/// 在构造函数里会合并类似A->xxx A->yyy这样两条文法变成 A->xxx|yyy
+	/// 所以还定义了initialProductions，保存了合并前的所有产生式，用于文法分析的时候一条一条判断。
+	/// remove_recursive用于消除左递归，消除后的文法存在productions里
+
 	class CFG {
 	protected:
 		/// V T P S
@@ -110,7 +129,6 @@ namespace Grammer {
 
 		void merge_productions();
 		CFG& remove_recursive();
-		CFG& take_common();
 
 		void test() {
 			using std::cout;
