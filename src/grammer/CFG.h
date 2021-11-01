@@ -86,8 +86,10 @@ namespace Grammer {
 		Production() {}
 		Production(Symbol _header) : header(_header) {}
 		friend std::ostream& operator <<(std::ostream& out, Production sym);
-		Symbol get_header() { return header; }
+		Symbol get_header() const { return header; }
 		std::vector<ProductionBody>& get_bodys() { return bodys; }
+		std::vector<ProductionBody> get_bodys_const() const { return bodys; }
+		const std::vector<ProductionBody>& get_bodys_const() { return bodys; }
 		void set_header(Symbol _header) { header = _header; }
 		/// add a rule
 		void append_body(ProductionBody body) { bodys.push_back(body); }
