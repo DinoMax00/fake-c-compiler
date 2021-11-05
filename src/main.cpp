@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--tokens-json" << "-show the tokens in json-format after lexer" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--ast" << "-show the ast-tree after parser" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--ast-json" << "-show the ast-tree in json-format after parser" << std::endl;
+		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--ast-viz" << "-show the ast-tree visulization" << std::endl;
 
 	}
 	else if (argc == 2) {
@@ -66,7 +67,20 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (strcmp(opt, "--ast-json") == 0) {
-			par.json_print();
+			std::cout << par.json_print() << std::endl;
+			return 0;
+		}
+
+		if (strcmp(opt, "--ast-viz") == 0) {
+			std::cout << "Loading..." << std::endl;
+			std::ofstream out(".\\ast-win32-x64\\resources\\app\\ast.json");
+			if (out.is_open())
+			{
+				out << par.json_print();
+				out.close();
+			}
+			system("start .\\ast-win32-x64\\ast.exe");
+			std::cout << "Done!" << std::endl;
 			return 0;
 		}
 	}

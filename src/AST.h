@@ -29,6 +29,7 @@ namespace AST {
 	public:
 		node(Grammer::Symbol _type): type(_type) {}
 		void set_name(Token _name) { name = _name; }
+		std::string get_name() { return type.get_name(); }
 		void add_child(node* nd) { childs.push_back(nd); }
 
 		void print_space(std::vector<int>* deps, bool flg = false) {
@@ -78,18 +79,23 @@ namespace AST {
 			}
 		}
 
-		std::string json_print() {
-			neb::CJsonObject json;
+		neb::CJsonObject json_print() {
+			neb::CJsonObject js;
+
 			if (childs.size()) {
+				js.Add("name", type.get_name());
+				js.AddEmptySubArray("children");
 				for (int i = childs.size() - 1; i >= 0; --i) {
-					neb::CJsonObject j(childs[i]->json_print());
-					if (childs[i]->childs.size()) json.Add(childs[i]->type.get_name(), j);
-					else json.Add(childs[i]->name.get_tokenkind_name(), childs[i]->json_print());
+					js["children"].Add(childs[i]->json_print());
 				}
 			}
-			else 
-				return name.get_data();
-			return json.ToFormattedString();
+			else {
+				js.Add("name", name.get_tokenkind_name());
+				js.Add("value", name.get_data());
+				js.Add("loc", "<" + std::to_string(name.get_row()) + "," + std::to_string(name.get_col()) + ">");
+			}
+
+			return js;
 		}
 	};
 }

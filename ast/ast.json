@@ -1,0 +1,58 @@
+{
+        "name": "<Start>",
+        "children": [{
+                        "name": "<Program>",
+                        "children": [{
+                                        "name": "<Type>",
+                                        "children": [{
+                                                        "name": "kw_int",
+                                                        "value": "int",
+                                                        "loc": "<1,1>"
+                                                }]
+                                }, {
+                                        "name": "<ID>",
+                                        "children": [{
+                                                        "name": "identifer",
+                                                        "value": "fun",
+                                                        "loc": "<1,5>"
+                                                }]
+                                }, {
+                                        "name": "l_paren",
+                                        "value": "(",
+                                        "loc": "<1,9>"
+                                }, {
+                                        "name": "r_paren",
+                                        "value": ")",
+                                        "loc": "<1,10>"
+                                }, {
+                                        "name": "<Statement_Blocks>",
+                                        "children": [{
+                                                        "name": "l_brace",
+                                                        "value": "{",
+                                                        "loc": "<1,12>"
+                                                }, {
+                                                        "name": "<Inner_Declare>",
+                                                        "children": [{
+                                                                        "name": "kw_int",
+                                                                        "value": "int",
+                                                                        "loc": "<2,2>"
+                                                                }, {
+                                                                        "name": "<ID>",
+                                                                        "children": [{
+                                                                                        "name": "identifer",
+                                                                                        "value": "c",
+                                                                                        "loc": "<2,6>"
+                                                                                }]
+                                                                }, {
+                                                                        "name": "semi",
+                                                                        "value": ";",
+                                                                        "loc": "<2,8>"
+                                                                }]
+                                                }, {
+                                                        "name": "r_brace",
+                                                        "value": "}",
+                                                        "loc": "<3,2>"
+                                                }]
+                                }]
+                }]
+}

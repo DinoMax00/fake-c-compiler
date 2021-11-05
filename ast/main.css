@@ -1,0 +1,49 @@
+html,body{
+	height: 100%;
+    margin: 0px;
+}
+
+body {
+    background-color: white;
+}
+
+svg {
+    width: 1200px;
+    height: 750px;
+    background-color: white;
+}
+
+text {
+    fill: coral;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+path {
+    stroke-width: 4px;
+    stroke: rgb(198, 190, 190);
+}
+
+.chartTooltip {
+    position: absolute;
+    width:170px;
+    height: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+.chartTooltip.hidden {
+    display: none;
+}
+
+.chartTooltip p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    word-wrap: break-word;
+}

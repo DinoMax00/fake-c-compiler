@@ -26,10 +26,24 @@ public:
 	/// return value refers wether a successful parse
 	int build_ast_tree();
 
-	void json_print() {
-		neb::CJsonObject json, j(root->json_print());
-		json.Add(lr1.get_start_symbol().get_name() + ": ", j);
-		std::cout << json.ToFormattedString() << std::endl;
+	std::string json_print() {
+		auto str = root->json_print().ToFormattedString();
+		std::string s;
+		bool flg = false;
+		for (auto ch : str) {
+			if (flg) {
+				if (ch != ' ' && ch != '\t') {
+					s += ' ';
+					s += ch;
+					flg = false;
+				}
+				continue;
+			}
+			s += ch;
+			if (ch == ':')
+				flg = true;
+		}
+		return s;
 	}
 
 	void print() {
