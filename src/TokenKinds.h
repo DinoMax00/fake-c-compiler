@@ -9,12 +9,16 @@ enum class TokenKind : unsigned short {
 	/// no type
 	UNKNOWN, 
 
+	/// number
+	INTEGER,
+
 	/// reserved keywords
 	INT,
 	VOID,
 	IF,
 	ELSE,
 	RETURN,
+	WHILE,
 
 	KEYWORDS, // if while ...
 	/// identifer
@@ -29,6 +33,8 @@ enum class TokenKind : unsigned short {
 	DIVIDE, // "/"
 	EQUAL, // "="
 	EQUAL_EQUAL, // "=="
+	GREATER, // ">"
+	LESS, // "<"
 	L_EQUAL, // "<="
 	R_EQUAL, // ">="
 	N_EQUAL, // "!="

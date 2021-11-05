@@ -42,7 +42,7 @@ int Parser::build_ast_tree() {
 			sym_cur = parserTable[state_cur].state_exproductions[edge_next].get_header();
 			//std::cout << sym_cur << " " << type_action << std::endl;
 			auto node = new AST::node(sym_cur);
-			for (int i = 0; i < parserTable[state_cur].state_exproductions[edge_next].get_bodys()[0].size(); i++)
+			for (int i = 0; i < (int)parserTable[state_cur].state_exproductions[edge_next].get_bodys()[0].size(); i++)
 			{
 				symbolStack.pop();
 				stateStack.pop();
@@ -69,6 +69,7 @@ int Parser::build_ast_tree() {
 			stateStack.push(edge_next);
 			symbolStack.push(sym_cur);
 			auto node = new AST::node(sym_cur);
+			node->set_name(*curToken);
 			nodeStack.push(node);
 			next();
 		}

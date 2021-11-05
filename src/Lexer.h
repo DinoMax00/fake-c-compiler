@@ -39,6 +39,14 @@ public:
 	Token get_next_token();
 	Token get_number();
 	Token get_identifier();
+	Token get_div();
+	Token get_equal();
+	Token get_greater();
+	Token get_less();
+	Token get_not();
+
+	void remove_comment();
+	void remove_comment_mult();
 
 	/// check curChar type
 	bool is_space() { return curChar == ' '; }

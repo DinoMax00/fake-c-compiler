@@ -8,7 +8,7 @@
 /// 就是LR1文法的项目
 class ExProduction : public Grammer::Production {
 	/// S -> .abc
-	int dotPos;
+	int dotPos = 0;
 	Grammer::Symbol tail;
 public:
 	friend std::ostream& operator <<(std::ostream& out, const ExProduction expr);
@@ -87,7 +87,7 @@ public:
 		//}
 		auto table = get_parser_table();
 		std::cout << nf.size() << std::endl;
-		for (int i = 0; i < nf.size(); i++)
+		for (int i = 0; i < (int)nf.size(); i++)
 		{
 			std::cout << i << "  ";
 			for (auto it : terminalSet)

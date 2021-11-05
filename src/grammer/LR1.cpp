@@ -53,7 +53,7 @@ LR1::LR1()
 std::ostream& operator << (std::ostream& out, ExProduction expr) {
 	out << expr.get_header().get_name() << " -> ";
 	auto body = expr.get_bodys()[0];
-	for (int i = 0; i < body.size(); i++) {
+	for (int i = 0; i < (int)body.size(); i++) {
 		if (i == expr.get_dotPos())
 			out << " ¡ð ";
 		out << body[i].get_name() << " ";
@@ -152,7 +152,7 @@ std::vector<ExProduction> LR1::get_closure(std::vector<ExProduction> closure)
 		{
 			auto body = it.get_bodys()[0];
 			int pos = it.get_dotPos();
-			if (pos < body.size() && body[pos].get_type() == Grammer::SymbolType::N_TERMINAL)
+			if (pos < (int)body.size() && body[pos].get_type() == Grammer::SymbolType::N_TERMINAL)
 			{
 				Grammer::Symbol sym_obj = body[pos];
 				for (auto it2 : exProductions)
@@ -160,7 +160,7 @@ std::vector<ExProduction> LR1::get_closure(std::vector<ExProduction> closure)
 					if (it2->get_header() == sym_obj && it2->get_dotPos() == 0)
 					{
 						std::vector<Grammer::Symbol> next_set;
-						for (int i = pos + 1; i < body.size(); i++)
+						for (int i = pos + 1; i < (int)body.size(); i++)
 							next_set.push_back(body[i]);
 						next_set.push_back(it.get_tail());
 						auto first_set = get_first_set_for_string(next_set);
@@ -212,7 +212,7 @@ std::vector<ExProduction> LR1::get_go(std::vector<ExProduction> expr_vec, Gramme
 	{
 		auto body = it.get_bodys()[0];
 		int pos = it.get_dotPos();
-		if (pos < body.size() && body[pos] == sym)
+		if (pos < (int)body.size() && body[pos] == sym)
 		{
 			ExProduction temp;
 			temp.append_body(body);
@@ -305,7 +305,7 @@ std::vector< std::vector<ExProduction> > LR1::generate_normal_family()
 int Search_set(std::vector< std::vector<ExProduction> > normal_family, std::vector<ExProduction> obj)
 {
 	int s;
-	for (s = 0; s < normal_family.size(); s++)
+	for (s = 0; s < (int)normal_family.size(); s++)
 	{
 		if (obj == normal_family[s])
 			break;
@@ -315,7 +315,7 @@ int Search_set(std::vector< std::vector<ExProduction> > normal_family, std::vect
 std::vector<State> LR1::get_parser_table()
 {
 	std::vector<State> parse_table;
-	for (int i = 0; i < normal_family.size(); i++)
+	for (int i = 0; i < (int)normal_family.size(); i++)
 	{
 		State new_state;
 		new_state.state_exproductions = normal_family[i];
@@ -332,7 +332,7 @@ std::vector<State> LR1::get_parser_table()
 				else
 				{
 					int s;
-					for (s = 0; s < new_state.state_exproductions.size(); s++)
+					for (s = 0; s < (int)new_state.state_exproductions.size(); s++)
 						if (new_state.state_exproductions[s] == it)
 							break;
 					new_state.edge[it.get_tail()] = s;
@@ -346,7 +346,7 @@ std::vector<State> LR1::get_parser_table()
 			if (new_go.size() > 0)
 			{
 				int s = Search_set(normal_family, new_go);
-				if (s < normal_family.size())
+				if (s < (int)normal_family.size())
 				{
 					new_state.edge[it] = s;
 					new_state.type[it] = 3;
@@ -359,7 +359,7 @@ std::vector<State> LR1::get_parser_table()
 			if (new_go.size() > 0)
 			{
 				int s = Search_set(normal_family, new_go);
-				if (s < normal_family.size())
+				if (s < (int)normal_family.size())
 				{
 					new_state.edge[it] = s;
 					new_state.type[it] = 4;

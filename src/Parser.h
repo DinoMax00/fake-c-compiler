@@ -22,11 +22,17 @@ public:
 
 	/// get next token
 	bool next();
+
 	/// return value refers wether a successful parse
 	int build_ast_tree();
+
 	void json_print() {
 		neb::CJsonObject json, j(root->json_print());
 		json.Add(lr1.get_start_symbol().get_name() + ": ", j);
 		std::cout << json.ToFormattedString() << std::endl;
+	}
+
+	void print() {
+		root->print();
 	}
 };
