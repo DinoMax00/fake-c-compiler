@@ -31,7 +31,7 @@ namespace Grammer {
 	public:
 		Symbol() {}
 		Symbol(std::string _name): name(_name) {
-			if (name[0] == '<')
+			if (name[0] == '<' && name[_name.size()-1] == '>')
 				type =  SymbolType::N_TERMINAL;
 			else 
 				type =  SymbolType::TERMINAL;
@@ -128,7 +128,8 @@ namespace Grammer {
 		CFG();
 		/// print the grammer
 		friend std::ostream& operator <<(std::ostream& out, const CFG& cfg);
-
+		std::set<Symbol> get_terminalSet(){	return terminalSet;}
+		std::set<Symbol> get_nonTerminalSet() { return nonTerminalSet; }
 		void merge_productions();
 		CFG& remove_recursive();
 

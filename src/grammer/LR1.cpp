@@ -4,14 +4,9 @@
 LR1::LR1()
 {
 	int production_num = productions.size();
-
-	Grammer::Symbol start_new = Grammer::Symbol("<Start>");
-	nonTerminalSet.insert(start_new);
 	shared_ptr<ExProduction> exprPtr = std::make_shared<ExProduction>();
-	Grammer::ProductionBody temp_body;
-	temp_body.push_back(startSymbol);
-	exprPtr->set_header(start_new);
-	exprPtr->append_body(temp_body);
+	exprPtr->set_header(productions[0]->get_header());
+	exprPtr->append_body(productions[0]->get_bodys()[0]);
 	exprPtr->set_dotPos(0);
 	exprPtr->set_tail(Grammer::Symbol("#"));
 	exProductions.push_back(exprPtr);
@@ -144,12 +139,24 @@ std::set<Grammer::Symbol> LR1::get_first_set_for_string(std::vector<Grammer::Sym
 std::vector<ExProduction> LR1::get_closure(std::vector<ExProduction> closure)
 {
 	bool control = true;
+	int visited[1000] = { 0 };
 	while (control)
 	{
 		control = false;
 		std::vector<ExProduction> add;
+		int i = 0;
 		for (auto it : closure)
 		{
+			if (visited[i])
+			{
+				i++;
+				continue;
+			}
+			else
+			{
+				visited[i] = 1;
+				i++;
+			}
 			auto body = it.get_bodys()[0];
 			int pos = it.get_dotPos();
 			if (pos < (int)body.size() && body[pos].get_type() == Grammer::SymbolType::N_TERMINAL)
@@ -233,12 +240,25 @@ std::vector< std::vector<ExProduction> > LR1::generate_normal_family()
 	start.push_back(*exProductions[0]);
 	normal_family.push_back(get_closure(start));
 	bool control = true;
+	int visited[500] = { 0 };
 	while (control)
 	{
+		std::cout << "222" << std::endl;
 		control = false;
 		std::vector< std::vector<ExProduction> > add;
+		int i = 0;
 		for (auto item_set : normal_family)
 		{
+			if (visited[i])
+			{
+				i++;
+				continue;
+			}
+			else
+			{
+				visited[i] = 1;
+				i++;
+			}
 			for (auto it : terminalSet)
 			{
 				auto new_go = get_go(item_set, it);
@@ -324,7 +344,7 @@ std::vector<State> LR1::get_parser_table()
 		{
 			if (it.get_dotPos() == it.get_bodys()[0].size())
 			{
-				if (it.get_header() == Grammer::Symbol("<Start>"))
+				if (it.get_header() == get_start_symbol())
 				{
 					new_state.edge[Grammer::Symbol("#")] = 0;
 					new_state.type[Grammer::Symbol("#")] = 1;

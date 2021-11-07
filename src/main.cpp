@@ -30,9 +30,13 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 		else if (strcmp(opt, "--action") == 0) {
+			LR1 lr1;
+			print_action(&lr1);
 			return 0;
 		}
 		else if (strcmp(opt, "--goto") == 0) {
+			LR1 lr1;
+			print_goto(&lr1);
 			return 0;
 		}
 	}

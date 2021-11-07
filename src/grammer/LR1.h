@@ -47,7 +47,7 @@ class LR1 : public Grammer::CFG {
 	std::vector<std::vector<ExProduction>> generate_normal_family();
 public:
 	std::vector<State> get_parser_table();
-	Grammer::Symbol get_start_symbol() { return Grammer::Symbol("Start"); }
+	Grammer::Symbol get_start_symbol() { return startSymbol; }
 	LR1();
 	void test() {
 		//for (auto i : exProductions)
@@ -74,44 +74,45 @@ public:
 		//}
 
 		auto nf = generate_normal_family();
-		//int i = 0;
-		//for(auto it:nf)
-		//{
-		//	i++;
-		//	std::cout << i << std::endl;
-		//	for (auto expr : it)
-		//	{
-		//		std::cout << expr << std::endl;
-		//	}
-		//	std::cout << std::endl;
-		//}
-		auto table = get_parser_table();
-		std::cout << nf.size() << std::endl;
-		for (int i = 0; i < (int)nf.size(); i++)
+		int i = 0;
+		for(auto it:nf)
 		{
-			std::cout << i << "  ";
-			for (auto it : terminalSet)
+			i++;
+			std::cout << i << std::endl;
+			for (auto expr : it)
 			{
-				if (table[i].type[it] == 1)
-					std::cout << it << " acc  ";
-				else if (table[i].type[it] == 2)
-					std::cout << it << " r" << table[i].edge[it] << "  ";
-				else if (table[i].type[it] == 3)
-					std::cout << it << " s" << table[i].edge[it] << "  ";
-			}
-			auto end = Grammer::Symbol("#");
-			if (table[i].type[end] == 1)
-				std::cout << end << " acc  ";
-			else if (table[i].type[end] == 2)
-				std::cout << end << " r" << table[i].edge[end] << "  ";
-			else if (table[i].type[end] == 3)
-				std::cout << end << " s" << table[i].edge[end] << "  ";
-			for (auto it : nonTerminalSet)
-			{
-				if (table[i].type[it] == 4)
-					std::cout << it << " GOTO" << table[i].edge[it] << "  ";
+				std::cout << expr << std::endl;
 			}
 			std::cout << std::endl;
 		}
+
+		//auto table = get_parser_table();
+		//std::cout << nf.size() << std::endl;
+		//for (int i = 0; i < (int)nf.size(); i++)
+		//{
+		//	std::cout << i << "  ";
+		//	for (auto it : terminalSet)
+		//	{
+		//		if (table[i].type[it] == 1)
+		//			std::cout << it << " acc  ";
+		//		else if (table[i].type[it] == 2)
+		//			std::cout << it << " r" << table[i].edge[it] << "  ";
+		//		else if (table[i].type[it] == 3)
+		//			std::cout << it << " s" << table[i].edge[it] << "  ";
+		//	}
+		//	auto end = Grammer::Symbol("#");
+		//	if (table[i].type[end] == 1)
+		//		std::cout << end << " acc  ";
+		//	else if (table[i].type[end] == 2)
+		//		std::cout << end << " r" << table[i].edge[end] << "  ";
+		//	else if (table[i].type[end] == 3)
+		//		std::cout << end << " s" << table[i].edge[end] << "  ";
+		//	for (auto it : nonTerminalSet)
+		//	{
+		//		if (table[i].type[it] == 4)
+		//			std::cout << it << " GOTO" << table[i].edge[it] << "  ";
+		//	}
+		//	std::cout << std::endl;
+		//}
 	}
 };

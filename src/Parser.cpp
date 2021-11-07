@@ -16,10 +16,9 @@ int Parser::build_ast_tree() {
 
 	/// init stacks
 	symbolStack.push(Grammer::Symbol("#"));
-	symbolStack.push(lr1.get_start_symbol());
 	stateStack.push(0);
 
-	while (symbolStack.top() != "#") {
+	while (!symbolStack.empty()) {
 		int state_cur = stateStack.top();
 		Grammer::Symbol sym_cur = curToken->get_name();
 		int type_action = parserTable[state_cur].type[sym_cur];
@@ -30,17 +29,20 @@ int Parser::build_ast_tree() {
 			//³É¹¦
 			sym_cur = parserTable[state_cur].state_exproductions[edge_next].get_header();
 			auto node = new AST::node(sym_cur);
-
-			auto child = nodeStack.top();
-			node->add_child(child);
-			nodeStack.pop();
+			for (int i = 0; i < (int)parserTable[state_cur].state_exproductions[edge_next].get_bodys()[0].size(); i++)
+			{
+				symbolStack.pop();
+				stateStack.pop();
+				auto child = nodeStack.top();
+				node->add_child(child);
+				nodeStack.pop();
+			}
 			root = node;
 			return true;
 		}
 		else if (type_action == 2)
 		{
 			sym_cur = parserTable[state_cur].state_exproductions[edge_next].get_header();
-			//std::cout << sym_cur << " " << type_action << std::endl;
 			auto node = new AST::node(sym_cur);
 			for (int i = 0; i < (int)parserTable[state_cur].state_exproductions[edge_next].get_bodys()[0].size(); i++)
 			{
@@ -65,7 +67,6 @@ int Parser::build_ast_tree() {
 		}
 		else if (type_action == 3)
 		{
-			//std::cout << sym_cur << " " << type_action  << std::endl;
 			stateStack.push(edge_next);
 			symbolStack.push(sym_cur);
 			auto node = new AST::node(sym_cur);
@@ -75,9 +76,10 @@ int Parser::build_ast_tree() {
 		}
 		else
 		{
-			std::cout << sym_cur << " " <<type_action <<" " << "ERROR" << std::endl;
+			std::cout << sym_cur << " " << type_action << " " << "ERROR" << std::endl;
 			exit(1);
 		}
+		std::cout << state_cur << " " << sym_cur << " " << edge_next << " " << type_action << std::endl;
 	}
 	return false;
 }
