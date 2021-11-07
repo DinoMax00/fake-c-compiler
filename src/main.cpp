@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -30,12 +32,18 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 		else if (strcmp(opt, "--action") == 0) {
+			
 			LR1 lr1;
+			std::cout << "Done! See action.txt" << std::endl;
+			freopen("action.txt", "w", stdout);
 			print_action(&lr1);
 			return 0;
 		}
 		else if (strcmp(opt, "--goto") == 0) {
+			
 			LR1 lr1;
+			std::cout << "Done! See goto.txt" << std::endl;
+			freopen("goto.txt", "w", stdout);
 			print_goto(&lr1);
 			return 0;
 		}
@@ -66,11 +74,15 @@ int main(int argc, char* argv[]) {
 		par.build_ast_tree();
 		
 		if (strcmp(opt, "--ast") == 0) {
+			std::cout << "Done! See ast.txt" << std::endl;
+			freopen("ast.txt", "w", stdout);
 			par.print();
 			return 0;
 		}
 
 		if (strcmp(opt, "--ast-json") == 0) {
+			std::cout << "Done! See ast-json.txt" << std::endl;
+			freopen("ast-json.txt", "w", stdout);
 			std::cout << par.json_print() << std::endl;
 			return 0;
 		}

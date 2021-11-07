@@ -235,6 +235,8 @@ std::vector<ExProduction> LR1::get_go(std::vector<ExProduction> expr_vec, Gramme
 
 std::vector< std::vector<ExProduction> > LR1::generate_normal_family()
 {
+	std::cout << "generating parser table...";
+
 	std::vector< std::vector<ExProduction> > normal_family;
 	std::vector<ExProduction> start;
 	start.push_back(*exProductions[0]);
@@ -243,7 +245,7 @@ std::vector< std::vector<ExProduction> > LR1::generate_normal_family()
 	int visited[500] = { 0 };
 	while (control)
 	{
-		std::cout << "222" << std::endl;
+		std::cout << "...";
 		control = false;
 		std::vector< std::vector<ExProduction> > add;
 		int i = 0;
@@ -319,6 +321,7 @@ std::vector< std::vector<ExProduction> > LR1::generate_normal_family()
 			control = true;
 		}
 	}
+	std::cout << std::endl;
 	return normal_family;
 }
 

@@ -41,6 +41,7 @@ int digit(int num)
 	}
 	return ans;
 }
+
 const int width_action = 15;
 void print_action(LR1* lr1) {
 	using std::cout;
@@ -122,6 +123,9 @@ void print_action(LR1* lr1) {
 		}
 		cout << "|";
 		cout << std::endl;
+		for (int space = (width_action + 1) * (lr1->get_terminalSet().size() + 2); space > 0; space--)
+			cout << "-";
+		cout << std::endl;
 	}
 }
 
@@ -165,6 +169,9 @@ void print_goto(LR1* lr1) {
 			cout << "|";
 		}
 		cout << std::endl;
+		for (int space = width_goto - digit(i); space > 0; space--)
+			cout << " ";
+		cout << "|";
 	}
 }
 

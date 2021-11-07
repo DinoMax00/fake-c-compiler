@@ -1,6 +1,4 @@
 $.getJSON("ast.json", function(astJson) {
-    console.log(astJson);
-
     var marge = {top:25, bottom:0, left:20, right:0};	
 	var svg = d3.select("svg");
 	var width = document.getElementById('d3').getBoundingClientRect().height;
@@ -10,10 +8,8 @@ $.getJSON("ast.json", function(astJson) {
 	var g = svg.append("g")
 		.attr("transform","translate("+marge.top+","+marge.left+")");
 	
-	var scale = svg.append("g")
-		.attr("transform","translate("+marge.top+","+marge.left+")");
-    
     var hierarchyData = d3.hierarchy(astJson);
+ 
     
     var zoom = d3.zoom()
         .scaleExtent([0.1, 100])
@@ -31,13 +27,14 @@ $.getJSON("ast.json", function(astJson) {
         });
     svg.call(zoom).on("dblclick.zoom", () => {});
 
+    let tmp = hierarchyData.height;
     //创建一个树状图
     var tree = d3.tree()
-        .size([width-100,height-100])
+        .size([200 * tmp ,  200 * (tmp + 1)])
         .separation(function(a,b){
                 return (a.parent==b.parent?1:2)/a.depth;
         });
-    
+
     var treeData = tree(hierarchyData);
     var nodes = treeData.descendants();
     var links = treeData.links();

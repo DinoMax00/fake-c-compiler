@@ -10,6 +10,8 @@ bool Parser::next() {
 }
 
 int Parser::build_ast_tree() {
+	std::cout << "building tree..." << std::endl;
+
 	std::stack<Grammer::Symbol> symbolStack;
 	std::stack<int> stateStack;
 	std::stack<AST::node*> nodeStack;
@@ -20,6 +22,7 @@ int Parser::build_ast_tree() {
 
 	while (!symbolStack.empty()) {
 		int state_cur = stateStack.top();
+
 		Grammer::Symbol sym_cur = curToken->get_name();
 		int type_action = parserTable[state_cur].type[sym_cur];
 		int edge_next = parserTable[state_cur].edge[sym_cur];
@@ -79,7 +82,6 @@ int Parser::build_ast_tree() {
 			std::cout << sym_cur << " " << type_action << " " << "ERROR" << std::endl;
 			exit(1);
 		}
-		std::cout << state_cur << " " << sym_cur << " " << edge_next << " " << type_action << std::endl;
 	}
 	return false;
 }
