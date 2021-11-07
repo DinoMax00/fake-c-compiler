@@ -16,8 +16,7 @@ int main(int argc, char* argv[]) {
 	if (argc == 1) {
 		std::cout << "OPTIONS:\n" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--grammer" << "-show the productions we use." << std::endl;
-		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--action" << "-show the LR(1) action table." << std::endl;
-		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--goto" << "-show the LR(1) goto table." << std::endl;
+		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--table" << "-show the LR(1) action & goto table." << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--tokens" << "-show the tokens after lexer" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--tokens-json" << "-show the tokens in json-format after lexer" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--ast" << "-show the ast-tree after parser" << std::endl;
@@ -31,20 +30,17 @@ int main(int argc, char* argv[]) {
 			print_productions();
 			return 0;
 		}
-		else if (strcmp(opt, "--action") == 0) {
-			
+		else if (strcmp(opt, "--table") == 0) {
+
 			LR1 lr1;
-			std::cout << "Done! See action.txt" << std::endl;
 			freopen("action.txt", "w", stdout);
 			print_action(&lr1);
-			return 0;
-		}
-		else if (strcmp(opt, "--goto") == 0) {
-			
-			LR1 lr1;
-			std::cout << "Done! See goto.txt" << std::endl;
+			fclose(stdout);
 			freopen("goto.txt", "w", stdout);
 			print_goto(&lr1);
+			fclose(stdout);
+			freopen("CON", "w", stdout);
+			std::cout << "Done! See action.txt & goto.txt" << std::endl;
 			return 0;
 		}
 	}
@@ -72,7 +68,7 @@ int main(int argc, char* argv[]) {
 
 		Parser par(lex.get_token_list());
 		par.build_ast_tree();
-		
+
 		if (strcmp(opt, "--ast") == 0) {
 			std::cout << "Done! See ast.txt" << std::endl;
 			freopen("ast.txt", "w", stdout);
@@ -100,6 +96,6 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}
-	
+
 	return 0;
 }

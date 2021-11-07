@@ -129,7 +129,7 @@ void print_action(LR1* lr1) {
 	}
 }
 
-const int width_goto = 20;
+const int width_goto = 30;
 void print_goto(LR1* lr1) {
 	using std::cout;
 	std::vector<State> table = lr1->get_parser_table();
@@ -169,9 +169,9 @@ void print_goto(LR1* lr1) {
 			cout << "|";
 		}
 		cout << std::endl;
-		for (int space = width_goto - digit(i); space > 0; space--)
-			cout << " ";
-		cout << "|";
+		for (int space = (width_goto + 1) * (lr1->get_nonTerminalSet().size() + 1); space > 0; space--)
+			cout << "-";
+		cout << std::endl;
 	}
 }
 

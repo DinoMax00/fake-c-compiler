@@ -64,7 +64,7 @@ int Parser::build_ast_tree() {
 				stateStack.push(edge_next);
 			else
 			{
-				std::cout << "ERROR" << std::endl;
+				std::cout << sym_cur << " " << "row:" << (*curToken).get_row() << " " << "col:"<< (*curToken).get_col() << " " << "ERROR" << std::endl;
 				exit(1);
 			}
 		}
@@ -79,7 +79,7 @@ int Parser::build_ast_tree() {
 		}
 		else
 		{
-			std::cout << sym_cur << " " << type_action << " " << "ERROR" << std::endl;
+			std::cout << sym_cur << " " << "row:" << (*curToken).get_row() << " " << "col:" << (*curToken).get_col() << " " << "ERROR" << std::endl;
 			exit(1);
 		}
 	}
