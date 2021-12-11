@@ -6,11 +6,12 @@
 #include <stack>
 #include <set>
 #include <tuple>
-
+#include <assert.h>
 #include "Token.h"
 #include "Grammer/CFG.h"
 
 typedef std::tuple<std::string, std::string, std::string, std::string> code_block;
+typedef std::tuple<std::string, TokenKind, std::string> param;
 
 /// 语句块
 class sNode {
@@ -37,7 +38,7 @@ public:
 	int offset = 0; /// 内存偏移量
 
 	std::string place = ""; /// 对应的中间变量
-	int function = 0; /// 所在函数id
+	std::string function = ""; /// 所在函数id
 	std::vector<int> dims; /// 数组的维度
 };
 
@@ -45,9 +46,9 @@ public:
 class FunctionSymbol {
 public:
 	std::string name; /// 函数的标识符、
-	std::string type; /// 返回值类型
-	int label; /// 入口处的标签
-	std::vector<std::string> params; /// 形参列表
+	TokenKind type; /// 返回值类型
+	std::string label; /// 入口处的标签
+	std::vector<param*> params; /// 形参列表
 };
 
 // 语义分析
@@ -94,7 +95,7 @@ public:
 
 		/// block -> { statementChain }
 		/// statement->declaration | ifStatement | iterStatement | returnStatement | assignStatement
-		else if (nt.is_one_of("statement", "block")) {
+		else if (nt.is_one_of("<statement>", "<block>")) {
 			auto n = sStack.back();
 			sStack.pop_back();
 			n.name = nt.get_name();
@@ -103,7 +104,7 @@ public:
 		}
 
 		/// declarationChain -> $ | declaration declarationChain
-		else if (nt.is("declarationChain")) {
+		else if (nt.is("<declarationChain>")) {
 			sNode n;
 			/// declaration declarationChain
 			if (r.size() == 2) {
@@ -117,7 +118,7 @@ public:
 		}
 
 		/// typeSpecifier -> int | void
-		else if (nt.is("typeSpecifier")) {
+		else if (nt.is("<typeSpecifier>")) {
 			auto n = sStack.back();
 			sStack.pop_back();
 			n.name = nt.get_name();
@@ -127,10 +128,11 @@ public:
 		}
 
 		/// declaration -> typeSpecifier id ; | completeFunction | typeSpecifier id arrayDeclaration ;
-		else if (nt.is("declaration")) {
+		else if (nt.is("<declaration>")) {
+			auto n = sNode();
 			/// -> typeSpecifier id ;
 			if (r.size() == 3) {
-				auto n = sStack.back();
+				n = sStack.back();
 				sStack.pop_back();
 				n.name = nt.get_name();
 				auto defType = n.type;
@@ -172,16 +174,168 @@ public:
 					s->offset = cur_offset;
 					cur_offset += s->size;
 					updateSymbolTable(s);
+					/// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!这里源代码有问题
 					//for (auto code : n.code) {
 					//	n.code.sta
 					//}
 				}
 			}
+			/// -> typeSpecifier id arrayDeclaration;
+			else if (r.size() == 4) {
+
+			}
+			/// -> completeFunction
+			else if (r.size() == 1) {
+				n = sStack.back();
+				sStack.pop_back();
+				n.name = nt.get_name();
+			}
+			sStack.push_back(n);
+		}
+
+		/// completeFunction -> declareFunction block
+		else if (nt.is("<completeFunction>")) {
+			auto n = sStack.back(); /// block
+			sStack.pop_back();
+
+			auto nDefine = sStack.back(); /// declareFunction
+			sStack.pop_back();
+
+			n.name = nt.get_name();
+			std::vector<code_block*> codeTmp;
+			codeTmp.push_back(new code_block(nDefine.data, ":", "_", "_"));
+
+			/// params
+			for (int i = 0; i < nDefine.stack.size(); ++i) {
+				auto node = nDefine.stack[i];
+				codeTmp.push_back(new code_block("pop", "_", std::to_string(4 * i), node.place));
+			}
+
+			if (nDefine.stack.size()) {
+				codeTmp.push_back(new code_block("-", "fp", std::to_string(4 * nDefine.stack.size()), "fp"));
+			}
+
+			std::reverse(codeTmp.begin(), codeTmp.end());
+			for (auto code : codeTmp) {
+				n.code.insert(n.code.begin(), code);
+			}
+
+			auto code_end = n.code.back();
+			/// 非main函数
+			if (std::get<0>(*code_end)[0] != 'l') {
+				auto label = std::get<0>(*code_end);
+				n.code.pop_back();
+				for (int i = 0; i < n.code.size(); ++i) {
+					auto code = n.code[i];
+					if (std::get<3>(*code) == label) {
+						n.code.erase(n.code.begin() + i);
+					}
+				}
+			}
+
+			sStack.push_back(n);
+		}
+
+		/// declareFunction -> typeSpecifier id ( formalParaList )
+		else if (nt.is("<declareFunction>")) {
+			auto n = sStack.back();
+			sStack.pop_back();
+			n.name = nt.get_name();
+
+			// 返回值类型
+			auto nFuncReturnType = sStack.back();
+			sStack.pop_back();
+			// 登记函数
+			auto f = new FunctionSymbol();
+			f->name = shift_str[shift_str.size() - 4].get_data();
+			f->type = nFuncReturnType.type;
+			if (f->name == "main") {
+				f->label = "main";
+			}
+			else {
+				f->label = getNewFuncLabel();
+			}
+
+			/// 搜索formalParaList表，记录参数列表
+			for (auto arg : n.stack) {
+				auto s = new sSymbol();
+				s->name = arg.data;
+				s->place = arg.place;
+				s->type = arg.type;
+				s->function = f->label;
+				s->size = 4;
+				s->offset = cur_offset;
+				cur_offset += s->size;
+
+				updateSymbolTable(s);
+
+				f->params.push_back(new param(arg.data, arg.type, arg.place));
+			}
+
+			n.data = f->label;
+			updateFuncTable(f);
+			sStack.clear(); // 清空
+			cur_func_symbol = *f;
+			sStack.push_back(n);
+		}
+
+		/// formalParaList -> $ | para | para, formalParaList | void
+		else if (nt.is("<formalParaList>")) {
+			auto n = sNode();
+			/// formalParaList -> para , formalParaList
+			if (r.size() == 3) {
+				n = sStack.back();
+				sStack.pop_back();
+				n.name = nt.get_name();
+				n.stack.insert(n.stack.begin(), sStack.back());
+			}
+			/// $ | void
+			else if (r.size() == 1 && (r[0].is_one_of("$", "void"))) {
+				n.name = nt.get_name();
+			}
+			else if (r.size() == 1 && r[0].is("<para>")) {
+				n.stack.insert(n.stack.begin(), sStack.back());
+				n.name = nt.get_name();
+			}
+			sStack.push_back(n);
+		}
+
+		/// para -> typeSpecifier id
+		else if (nt.is("<para>")) {
+			assert(r.size() == 2);
+			auto n = sStack.back();
+			sStack.pop_back();
+			n.name = nt.get_name();
+			n.place = getNewTemp();
+			n.data = shift_str.back().get_data();
+			sStack.push_back(n);
+		}
+
+		/// statementChain -> $ | statement statementChain
+		else if (nt.is("<statementChain>")) {
+			assert(r.size() <= 2);
+			if (r.size() == 1) {
+				auto n = sNode();
+				n.name = nt.get_name();
+				sStack.push_back(n);
+			}
+			else if (r.size() == 2) {
+				auto n = sStack.back();
+				sStack.pop_back();
+				n.stack.insert(n.stack.begin(), sStack.back());
+				n.name = nt.get_name();
+				// statement.code，statementChain.code是顺序的, 但前者要在后者前面
+				for (int i = n.stack[0].code.size() - 1; i >= 0; --i) {
+					n.code.insert(n.code.begin(), n.stack[0].code[i]);
+				}
+
+				sStack.push_back(n);
+			}
 		}
 	}
 private:
 	/// 在符号表中查找符号
-	sSymbol* findSymbol(std::string name, int func) {
+	sSymbol* findSymbol(std::string name, std::string func) {
 		for (auto s : symbol_table) {
 			if (s->name == name && s->function == func) {
 				return s;
@@ -199,6 +353,18 @@ private:
 			}
 		}
 		symbol_table.insert(sym);
+		return;
+	}
+
+	/// 更新函数表
+	void updateFuncTable(FunctionSymbol* fs) {
+		for (auto f : func_table) {
+			if (f->name == fs->name) {
+				func_table.erase(f);
+				break;
+			}
+		}
+		func_table.insert(fs);
 		return;
 	}
 
