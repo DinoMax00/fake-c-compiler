@@ -12,7 +12,6 @@
 #include "Lexer.h"
 
 int main(int argc, char* argv[]) {
-
 	if (argc == 1) {
 		std::cout << "OPTIONS:\n" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--grammer" << "-show the productions we use." << std::endl;
@@ -31,16 +30,16 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 		else if (strcmp(opt, "--table") == 0) {
-
 			LR1 lr1;
-			freopen("action.txt", "w", stdout);
+			// freopen("action.txt", "w", stdout);
 			print_action(&lr1);
-			fclose(stdout);
-			freopen("goto.txt", "w", stdout);
+
+			// fclose(stdout);
+			// freopen("goto.txt", "w", stdout);
 			print_goto(&lr1);
-			fclose(stdout);
-			freopen("CON", "w", stdout);
-			std::cout << "Done! See action.txt & goto.txt" << std::endl;
+			// fclose(stdout);
+			// freopen("CON", "w", stdout);
+			// std::cout << "Done! See action.txt & goto.txt" << std::endl;
 			return 0;
 		}
 	}
@@ -70,15 +69,15 @@ int main(int argc, char* argv[]) {
 		par.build_ast_tree();
 
 		if (strcmp(opt, "--ast") == 0) {
-			std::cout << "Done! See ast.txt" << std::endl;
-			freopen("ast.txt", "w", stdout);
+			//std::cout << "Done! See ast.txt" << std::endl;
+			//freopen("ast.txt", "w", stdout);
 			par.print();
 			return 0;
 		}
 
 		if (strcmp(opt, "--ast-json") == 0) {
-			std::cout << "Done! See ast-json.txt" << std::endl;
-			freopen("ast-json.txt", "w", stdout);
+			//std::cout << "Done! See ast-json.txt" << std::endl;
+			//freopen("ast-json.txt", "w", stdout);
 			std::cout << par.json_print() << std::endl;
 			return 0;
 		}

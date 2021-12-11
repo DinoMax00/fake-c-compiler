@@ -94,7 +94,7 @@ Token Lexer::get_not() {
 		return Token(TokenKind::N_EQUAL, row, col, "!=");
 	}
 	else {
-		/// ±¾´Î×÷ÒµÖÐÃ»ÓÐ£¡ÔËËã·û
+		/// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½Ã»ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		std::cerr << "unknown symbol '!' at row: " << row << " col: " << col << std::endl;
 		exit(0);
 	}
@@ -132,13 +132,6 @@ Token Lexer::get_identifier() {
 		return Token(TokenKind::RETURN, row, stCol, res);
 	else
 		return Token(TokenKind::IDENTIFER, row, stCol, res);
-	//bool flg = false;
-	//for (int i = 0; i < keywordsNum; ++i) {
-	//	if (keywords[i] == res)
-	//		flg = true;
-	//}
-	//if (flg) return Token(TokenKind::KEYWORDS, row, stCol, res);
-	//return Token(TokenKind::IDENTIFER, row, stCol, res);
 }
 
 Token Lexer::get_next_token() {

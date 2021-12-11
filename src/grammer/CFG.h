@@ -63,6 +63,11 @@ namespace Grammer {
 		bool operator < (const Symbol& rhs) const {
 			return name < rhs.name;
 		}
+
+		bool is(std::string k) { return *this == k; }
+		bool is_one_of(std::string k1, std::string k2) {
+			return is(k1) || is(k2);
+		}
 	};
 
 	/// 这个是一条产生式的右半部分，就是一系列Symbol组成的vector

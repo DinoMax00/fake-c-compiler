@@ -8,7 +8,7 @@ constexpr int listLength = 100;
 constexpr int tokenNum = 20;
 
 static std::string rules[listLength][tokenNum] = {
-
+/*
 {
 	"<Program>", "<Declare_String>", END_SYMBOL
 },
@@ -163,6 +163,25 @@ static std::string rules[listLength][tokenNum] = {
 {
 	"<ID>", "identifier", END_SYMBOL
 },
+*/
+	{
+		"<Program>", "<Type>", "<ID>", "(", ")", "<Statement_Blocks>", END_SYMBOL
+	},
+	{
+		"<Type>", "int", END_SYMBOL
+	},
+	{
+		"<Type>", "void", END_SYMBOL
+	},
+	{
+		"<ID>", "identifier", END_SYMBOL
+	},
+	{
+		"<Statement_Blocks>", "{", "<Inner_Declare>", "}", END_SYMBOL
+	},
+	{
+		"<Inner_Declare>", "int", "<ID>", ";", END_SYMBOL
+	},
 {
 	END_SYMBOL
 },

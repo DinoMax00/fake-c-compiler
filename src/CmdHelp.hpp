@@ -7,6 +7,7 @@
 #include "grammer/GrammerRules.h"
 #include "Lexer.h"
 
+
 void print_productions() {
 	using std::cout;
 	for (int i = 0; i < listLength; ++i) {
@@ -19,12 +20,17 @@ void print_productions() {
 			cout << "| ";
 		}
 		else {
-			cout << rules[i][0] << " -->  ";
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | BLUE);
+			cout << std::endl << rules[i][0];
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WHITE);
+			cout << " -->  ";
 		}
 		for (int j = 1; j < tokenNum; ++j) {
 			if (rules[i][j] == END_SYMBOL)
 				break;
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | YELLOW);
 			cout << rules[i][j] << " ";
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WHITE);
 		}
 		cout << std::endl;
 	}
@@ -181,11 +187,19 @@ void print_tokens(const char* filename, Lexer* lexer) {
 
 	auto vec = lexer->get_token_list();
 	for (auto& it : vec) {
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | BLUE);
 		cout << std::setw(12) << std::setiosflags(std::ios::left) << it.get_tokenkind_name();
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WHITE);
+
 		cout << std::setw(8) << std::setiosflags(std::ios::left) << std::string("id=") + std::to_string(it.get_id());
+
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | YELLOW);
 		cout << std::setw(13) << std::setiosflags(std::ios::left) << std::string(" \"") + it.get_data() + "\"";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WHITE);
+
 		cout << " Loc=<" << filename << ":" << it.get_row() << ":" << it.get_col() << ">";
 		cout << endl;
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WHITE);
 	}
 }
 
