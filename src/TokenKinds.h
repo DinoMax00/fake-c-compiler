@@ -14,7 +14,7 @@ enum class TokenKind : unsigned short {
 
 	/// reserved keywords
 	INT,
-	VOID,
+	Void,
 	IF,
 	ELSE,
 	RETURN,

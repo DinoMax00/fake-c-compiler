@@ -121,7 +121,7 @@ Token Lexer::get_identifier() {
 	if (res == "int") 
 		return Token(TokenKind::INT, row, stCol, res);
 	else if (res == "void")
-		return Token(TokenKind::VOID, row, stCol, res);
+		return Token(TokenKind::Void, row, stCol, res);
 	else if (res == "if")
 		return Token(TokenKind::IF, row, stCol, res);
 	else if (res == "else")

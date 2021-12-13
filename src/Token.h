@@ -99,7 +99,7 @@ public:
 			case TokenKind::INT:
 				return "kw_int";
 				break;
-			case TokenKind::VOID:
+			case TokenKind::Void:
 				return "kw_void";
 				break;
 			case TokenKind::IF:
