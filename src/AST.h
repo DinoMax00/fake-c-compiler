@@ -7,6 +7,8 @@
 #include "grammer/CFG.h"
 #include "json/CJsonObject.hpp"
 
+#include <iostream>
+
 /// color print
 constexpr int RED = FOREGROUND_RED;
 constexpr int YELLOW = FOREGROUND_RED | FOREGROUND_GREEN;
@@ -41,7 +43,8 @@ namespace AST {
 		node(Grammer::Symbol _type) : type(_type) {}
 		void set_name(Token _name) { name = _name; }
 		std::string get_name() { return type.get_name(); }
-		void add_child(node* nd) { childs.push_back(nd); }
+		void add_child(node* nd) { childs.insert(childs.begin(), nd); }
+		//注意要始终在首位插入
 
 		void print_space(std::vector<int>* deps, bool flg = false) {
 			using std::cout;
@@ -154,46 +157,51 @@ private:
 	std::vector<acpara> acpara_table;	//实参暂存表
 
 public:
-	/// 在符号表中查找符号
+	/// 在变量表中查找变量
 	vSymbol* findSymbol(std::string name, std::string func) {
-		for (auto s : symbol_table) {
-			if (s.name == name && s.func == func) {
-				return &s;
+		for (int i = 0; i < symbol_table.size(); i++) {
+			if (symbol_table[i].name == name && symbol_table[i].func == func) {
+				return &symbol_table[i];
 			}
 		}
-		for (auto s : symbol_table) {
-			if (s.name == name && s.func == "") {
-				return &s;
+		for (int i = 0; i < symbol_table.size(); i++) {
+			if (symbol_table[i].name == name && symbol_table[i].func == "") {
+				return &symbol_table[i];
+			}
+		}
+		return nullptr;
+	}
+	/// 在函数表中查找函数
+	fSymbol* findFunction(std::string name) {
+		for (int i = 0; i < function_table.size(); i++) {
+			if (function_table[i].name == name) {
+				return &function_table[i];
 			}
 		}
 		return nullptr;
 	}
 
 	/// 更新符号表
-	void updateSymbolTable(vSymbol sym) {
+	int updateSymbolTable(vSymbol sym) {
 		for (int i = 0; i < symbol_table.size(); i++)
 		{
-			if (symbol_table[i].name == sym.name && symbol_table[i].func == sym.func) {
-				symbol_table.erase(symbol_table.begin()+i);
-				break;
-			}
+			if (symbol_table[i].name == sym.name && symbol_table[i].func == sym.func)
+				return 0;
 		}
 		symbol_table.push_back(sym);
-		return;
+		return 1;
 	}
 
 	/// 更新函数表
-	void updateFuncTable(fSymbol fs) {
-		for (int i = 0; i < function_table.size();i++) 
+	int updateFuncTable(fSymbol fs) {
+		for (int i = 0; i < function_table.size(); i++)
 		{
 			//前提是不允许函数嵌套
-			if (function_table[i].name == fs.name) {
-				function_table.erase(function_table.begin()+i);
-				break;
-			}
+			if (function_table[i].name == fs.name)
+				return 0;
 		}
 		function_table.push_back(fs);
-		return;
+		return 1;
 	}
 
 	int getNewTemp() {
@@ -212,4 +220,29 @@ public:
 	}
 
 	void analyze(AST::node*);
+
+	void print()
+	{
+		using std::cout;
+		for (auto i : midcode_set)
+		{
+			int format = 10 - std::get<0>(i).size();
+			cout << std::get<0>(i);
+			for (int i = 0; i < format; i++)
+				cout << " ";
+			format = 10 - std::get<1>(i).size();
+			cout << std::get<1>(i);
+			for (int i = 0; i < format; i++)
+				cout << " ";
+			format = 10 - std::get<2>(i).size();
+			cout << std::get<2>(i);
+			for (int i = 0; i < format; i++)
+				cout << " ";
+			format = 10 - std::get<3>(i).size();
+			cout << std::get<3>(i);
+			for (int i = 0; i < format; i++)
+				cout << " ";
+			cout << std::endl;
+		}
+	}
 };

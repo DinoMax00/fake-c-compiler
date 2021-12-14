@@ -5,6 +5,8 @@
 #include <tuple>
 #include "AST.h"
 
+#include <iostream>
+
 
 void Semantic::analyze(AST::node* cur)
 {
@@ -32,8 +34,8 @@ void Semantic::analyze(AST::node* cur)
 	}
 	else if (header == "<Declare>")
 	{
-		if (cur->childs[0]->type == "<Variable_Declare>")
-			//"<Declare>", "int","identifier", "<Variable_Declare>"
+		if (cur->childs.size() == 3)
+			//"<Declare>", "int","identifier", ";"
 		{
 			for (auto i : cur->childs)
 				analyze(i);
@@ -47,9 +49,10 @@ void Semantic::analyze(AST::node* cur)
 			vs.func = "";
 			updateSymbolTable(vs);
 		}
-		else if (cur->childs[0]->type == "<Func_Declare>")
-			//"<Declare>", "int/void","identifier", "<Func_Declare>"
+		else if (cur->childs.size() == 6)
+			//"<Declare>", "int/void","identifier","(",  "<Formal_Para>", ")", "<Statement_Blocks>"
 		{
+			para_table.clear();
 			fSymbol fs;
 			fs.name = cur->childs[1]->name.get_data();
 			fs.type = cur->childs[0]->name.get_kind();
@@ -59,31 +62,34 @@ void Semantic::analyze(AST::node* cur)
 				fs.entry = getNewFuncLabel();
 			if (fs.name != "main")
 			{
-				std::string func_entry = std::string("L") + std::to_string(fs.entry);
+				std::string func_entry = std::string("F") + std::to_string(fs.entry);
 				midcode_set.push_back(midcode(func_entry, ":", "", ""));
 			}
-			para_table.clear();
+			else
+			{
+				midcode_set.push_back(midcode("main", ":", "", ""));
+			}
 			this->cur_function.name = fs.name;
-			for (auto i : cur->childs)
-				analyze(i);
+			analyze(cur->childs[3]);
 			for (auto i : para_table)
+			{
 				fs.paras.push_back(i);
+				vSymbol vs;
+				vs.name = i.second;
+				vs.type = i.first;	//可能需改
+				vs.size = 4;
+				vs.offset = cur_offset;
+				cur_offset += vs.size;	//作用?
+				vs.pos = getNewTemp();
+				vs.func = this->cur_function.name;
+				updateSymbolTable(vs);
+				midcode_set.push_back(midcode("POP", vs.name, "", ""));
+			}
 			updateFuncTable(fs);
 			para_table.clear();
+			analyze(cur->childs[5]);
 			this->cur_function.name = "";
 		}
-	}
-	else if (header == "<Variable_Declare>")
-		//"<Variable_Declare>", ";"
-	{
-		for (auto i : cur->childs)
-			analyze(i);
-	}
-	else if (header == "<Func_Declare>")
-		//"<Func_Declare>",  "(","<Formal_Para>", ")", "<Statement_Blocks>"
-	{
-		for (auto i : cur->childs)
-			analyze(i);
 	}
 	else if (header == "<Formal_Para>")
 	{
@@ -121,7 +127,7 @@ void Semantic::analyze(AST::node* cur)
 		for (auto i : cur->childs)
 			analyze(i);
 		TokenKind type = cur->childs[0]->name.get_kind();
-		std::string name = cur->childs[1]->name.get_data();
+		std::string name = cur->childs[1]->childs[0]->name.get_data();
 		para_table.push_back(para(type, name));
 	}
 	else if (header == "<Statement_Blocks>")
@@ -160,7 +166,7 @@ void Semantic::analyze(AST::node* cur)
 		for (auto i : cur->childs)
 			analyze(i);
 		vSymbol vs;
-		vs.name = cur->childs[1]->name.get_data();
+		vs.name = cur->childs[1]->childs[0]->name.get_data();
 		vs.type = cur->childs[0]->name.get_kind();	//可能需改
 		vs.size = 4;
 		vs.offset = cur_offset;
@@ -196,14 +202,17 @@ void Semantic::analyze(AST::node* cur)
 		for (auto i : cur->childs)
 			analyze(i);
 		std::string arg1;
-		if (cur->childs[2]->data)
-			arg1 = std::to_string(cur->childs[2]->data);
-		else
+		if (cur->childs[2]->pos)
 			arg1 = "T" + std::to_string(cur->childs[2]->pos);
+		else
+			arg1 = std::to_string(cur->childs[2]->data);
 		std::string result;
-		vSymbol* var = findSymbol(cur->childs[0]->name.get_data(), this->cur_function.name);
+		vSymbol* var = findSymbol(cur->childs[0]->childs[0]->name.get_data(), this->cur_function.name);
 		if (var)
 			result = "T" + std::to_string(var->pos);
+		else
+			result = "ERROR";
+		//**需添加错误处理
 		midcode_set.push_back(midcode(":=", arg1, "", result));
 	}
 	else if (header == "<Statement_Return>")
@@ -363,8 +372,12 @@ void Semantic::analyze(AST::node* cur)
 		{
 			for (auto i : cur->childs)
 				analyze(i);
-			cur->pos = cur->childs[0]->pos;
-			cur->data = cur->childs[0]->data;
+			vSymbol* var = findSymbol(cur->childs[0]->childs[0]->name.get_data(), this->cur_function.name);
+			if (var)
+				cur->pos = var->pos;
+			else
+				cur->pos = 0;
+			//**需添加错误处理
 		}
 		else if (cur->childs.size() == 3)
 			//"<Factor>", "(","<Expr>",")"
@@ -377,15 +390,31 @@ void Semantic::analyze(AST::node* cur)
 		else if (cur->childs.size() == 4)
 			//"<Factor>", "<ID>","(", "<acPara_List>", ")"
 		{
+			std::vector<acpara> acpara_table_backup;
+			for (auto i : acpara_table)
+				acpara_table_backup.push_back(i);
 			acpara_table.clear();
+			//暂存实参表以处理嵌套
 			for (auto i : cur->childs)
 				analyze(i);
-			for (auto i : acpara_table)
+			cur->pos = getNewTemp();
+			std::string result = std::string("T") + std::to_string(cur->pos);
+			std::string func_name = cur->childs[0]->childs[0]->name.get_data();
+			auto f = findFunction(func_name);
+			if (f != nullptr)
 			{
-				std::string p = std::get<2>(i);
-				midcode_set.push_back(midcode("Push", p, "", ""));
+				for (auto i : acpara_table)
+				{
+					std::string p = std::get<2>(i);
+					midcode_set.push_back(midcode("Push", p, "", ""));
+				}
+				std::string func_entry = "F" + std::to_string(f->entry);
+				midcode_set.push_back(midcode("Call", func_entry, "", ""));
+				midcode_set.push_back(midcode(":=", "EAX", "", result));
 			}
 			acpara_table.clear();
+			for (auto i : acpara_table_backup)
+				acpara_table.push_back(i);
 		}
 	}
 	else if (header == "<acPara_List>")
@@ -393,8 +422,7 @@ void Semantic::analyze(AST::node* cur)
 		if (cur->childs.size() == 1)
 			//"<acPara_List>", "<Expr>"
 		{
-			for (auto i : cur->childs)
-				analyze(i);
+			analyze(cur->childs[0]);
 			TokenKind type = cur->childs[0]->datatype;
 			std::string name = "";
 			std::string arg;
@@ -407,8 +435,7 @@ void Semantic::analyze(AST::node* cur)
 		else if (cur->childs.size() == 3)
 			//"<acPara_List>", "<Expr>",",","<acPara_List>"
 		{
-			for (auto i : cur->childs)
-				analyze(i);
+			analyze(cur->childs[0]);
 			TokenKind type = cur->childs[0]->datatype;
 			std::string name = "";
 			std::string arg;
@@ -417,6 +444,7 @@ void Semantic::analyze(AST::node* cur)
 			else
 				arg = "T" + std::to_string(cur->childs[0]->pos);
 			acpara_table.push_back(acpara(type, name, arg));
+			analyze(cur->childs[2]);
 		}
 	}
 	else if (header == "<ID>")

@@ -49,4 +49,8 @@ public:
 	void print() {
 		root->print();
 	}
+
+	AST::node* get_root() {
+		return root;
+	}
 };

@@ -31,15 +31,15 @@ int main(int argc, char* argv[]) {
 		}
 		else if (strcmp(opt, "--table") == 0) {
 			LR1 lr1;
-			// freopen("action.txt", "w", stdout);
+			freopen("action.txt", "w", stdout);
 			print_action(&lr1);
 
-			// fclose(stdout);
-			// freopen("goto.txt", "w", stdout);
+			fclose(stdout);
+			freopen("goto.txt", "w", stdout);
 			print_goto(&lr1);
-			// fclose(stdout);
-			// freopen("CON", "w", stdout);
-			// std::cout << "Done! See action.txt & goto.txt" << std::endl;
+			fclose(stdout);
+			freopen("CON", "w", stdout);
+			std::cout << "Done! See action.txt & goto.txt" << std::endl;
 			return 0;
 		}
 	}
@@ -69,15 +69,15 @@ int main(int argc, char* argv[]) {
 		par.build_ast_tree();
 
 		if (strcmp(opt, "--ast") == 0) {
-			//std::cout << "Done! See ast.txt" << std::endl;
-			//freopen("ast.txt", "w", stdout);
+			std::cout << "Done! See ast.txt" << std::endl;
+			freopen("ast.txt", "w", stdout);
 			par.print();
 			return 0;
 		}
 
 		if (strcmp(opt, "--ast-json") == 0) {
-			//std::cout << "Done! See ast-json.txt" << std::endl;
-			//freopen("ast-json.txt", "w", stdout);
+			std::cout << "Done! See ast-json.txt" << std::endl;
+			freopen("ast-json.txt", "w", stdout);
 			std::cout << par.json_print() << std::endl;
 			return 0;
 		}
@@ -93,6 +93,17 @@ int main(int argc, char* argv[]) {
 			system("start .\\ast-win32-x64\\ast.exe");
 			std::cout << "Done!" << std::endl;
 			return 0;
+		}
+
+		if (strcmp(opt, "--midcode") == 0) {
+			std::cout << "Done! See midcode.txt" << std::endl;
+			freopen("midcode.txt", "w", stdout);
+			Semantic sem;
+			sem.analyze(par.get_root());
+			sem.print();
+			fclose(stdout);
+			freopen("CON", "w", stdout);
+			sem.print();
 		}
 	}
 

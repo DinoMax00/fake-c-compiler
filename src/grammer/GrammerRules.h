@@ -19,19 +19,13 @@ static std::string rules[listLength][tokenNum] = {
 	"<Declare_String>", "<Declare>", "<Declare_String>", END_SYMBOL
 },
 {
-	"<Declare>", "int","identifier", "<Variable_Declare>", END_SYMBOL
+	"<Declare>", "int","identifier", ";", END_SYMBOL
 },
 {
-	"<Declare>", "int","identifier", "<Func_Declare>", END_SYMBOL
+	"<Declare>", "int","identifier","(",  "<Formal_Para>", ")", "<Statement_Blocks>", END_SYMBOL
 },
 {
-	"<Declare>", "void","identifier", "<Func_Declare>", END_SYMBOL
-},
-{
-	"<Variable_Declare>", ";", END_SYMBOL
-},
-{
-	"<Func_Declare>",  "(","<Formal_Para>", ")", "<Statement_Blocks>", END_SYMBOL
+	"<Declare>", "void","identifier", "(",  "<Formal_Para>", ")", "<Statement_Blocks>",END_SYMBOL
 },
 {
 	"<Formal_Para>",  "<Para_List>", END_SYMBOL

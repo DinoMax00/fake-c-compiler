@@ -1,14 +1,17 @@
 #include <algorithm>
+#include <set>
 #include "LR1.h"
 
 LR1::LR1()
 {
+	int counter = 0;
 	int production_num = productions.size();
 	shared_ptr<ExProduction> exprPtr = std::make_shared<ExProduction>();
 	exprPtr->set_header(productions[0]->get_header());
 	exprPtr->append_body(productions[0]->get_bodys()[0]);
 	exprPtr->set_dotPos(0);
 	exprPtr->set_tail(Grammer::Symbol("#"));
+	exprPtr->set_hash();
 	exProductions.push_back(exprPtr);
 
 	for (int i = 0; i < production_num; i++)
@@ -28,6 +31,7 @@ LR1::LR1()
 					exprPtr->append_body(body_now);
 					exprPtr->set_dotPos(k);
 					exprPtr->set_tail(it);
+					exprPtr->set_hash();
 					exProductions.push_back(exprPtr);
 				}
 				for (auto it : nonTerminalSet)
@@ -37,12 +41,13 @@ LR1::LR1()
 					exprPtr->append_body(body_now);
 					exprPtr->set_dotPos(k);
 					exprPtr->set_tail(it);
+					exprPtr->set_hash();
 					exProductions.push_back(exprPtr);
 				}
 			}
 		}
 	}
-	normal_family = generate_normal_family();
+	generate_normal_family();
 }
 
 std::ostream& operator << (std::ostream& out, ExProduction expr) {
@@ -140,23 +145,21 @@ std::vector<ExProduction> LR1::get_closure(std::vector<ExProduction> closure)
 {
 	bool control = true;
 	int visited[1000] = { 0 };
+	std::map<ExProduction, int> dupCheck;
 	while (control)
 	{
 		control = false;
 		std::vector<ExProduction> add;
+		std::map<ExProduction, int> visitedCheck;
 		int i = 0;
 		for (auto it : closure)
+			visitedCheck[it] = 1;
+		for (auto it : closure)
 		{
-			if (visited[i])
-			{
-				i++;
+			if (dupCheck[it])
 				continue;
-			}
 			else
-			{
-				visited[i] = 1;
-				i++;
-			}
+				dupCheck[it] = 1;
 			auto body = it.get_bodys()[0];
 			int pos = it.get_dotPos();
 			if (pos < (int)body.size() && body[pos].get_type() == Grammer::SymbolType::N_TERMINAL)
@@ -178,25 +181,12 @@ std::vector<ExProduction> LR1::get_closure(std::vector<ExProduction> closure)
 						for (auto sym : first_set)
 						{
 							temp.set_tail(sym);
-							bool check = false;
-							for (auto check_it : closure)
+							temp.set_hash();
+							if (!visitedCheck[temp])
 							{
-								if (check_it == temp)
-								{
-									check = true;
-									break;
-								}
-							}
-							for (auto check_it : add)
-							{
-								if (check_it == temp)
-								{
-									check = true;
-									break;
-								}
-							}
-							if (!check)
+								visitedCheck[temp] = 1;
 								add.push_back(temp);
+							}
 						}
 					}
 				}
@@ -226,6 +216,7 @@ std::vector<ExProduction> LR1::get_go(std::vector<ExProduction> expr_vec, Gramme
 			temp.set_header(it.get_header());
 			temp.set_tail(it.get_tail());
 			temp.set_dotPos(pos + 1);
+			temp.set_hash();
 			go.push_back(temp);
 		}
 	}
@@ -233,58 +224,64 @@ std::vector<ExProduction> LR1::get_go(std::vector<ExProduction> expr_vec, Gramme
 	return go;
 }
 
-std::vector< std::vector<ExProduction> > LR1::generate_normal_family()
+std::vector<std::vector<ExProduction> > LR1::generate_normal_family()
 {
 	std::cout << "generating parser table...";
-
-	std::vector< std::vector<ExProduction> > normal_family;
+	int count = 0;
 	std::vector<ExProduction> start;
+	std::map<std::vector<ExProduction>, int> dupCheck;
+	std::map<std::vector<ExProduction>, int> setIndex;
 	start.push_back(*exProductions[0]);
-	normal_family.push_back(get_closure(start));
+	start = get_closure(start);
+	normal_family.push_back(start);
+	setIndex[start] = ++count;
 	bool control = true;
-	int visited[500] = { 0 };
 	while (control)
 	{
 		std::cout << "...";
 		control = false;
-		std::vector< std::vector<ExProduction> > add;
-		int i = 0;
-		for (auto item_set : normal_family)
+		std::vector<std::vector<ExProduction> > add;
+		for (auto item_set : this->normal_family)
 		{
-			if (visited[i])
-			{
-				i++;
+			if (dupCheck[item_set])
 				continue;
-			}
 			else
+				dupCheck[item_set] = 1;
+			State new_state;
+			new_state.state_exproductions = item_set;
+			for (auto it : item_set)
 			{
-				visited[i] = 1;
-				i++;
+				if (it.get_dotPos() == it.get_bodys()[0].size())
+				{
+					if (it.get_header() == get_start_symbol())
+					{
+						new_state.edge[Grammer::Symbol("#")] = 0;
+						new_state.type[Grammer::Symbol("#")] = 1;
+					}
+					else
+					{
+						int s;
+						for (s = 0; s < (int)new_state.state_exproductions.size(); s++)
+							if (new_state.state_exproductions[s] == it)
+								break;
+						new_state.edge[it.get_tail()] = s;
+						new_state.type[it.get_tail()] = 2;
+					}
+				}
 			}
 			for (auto it : terminalSet)
 			{
 				auto new_go = get_go(item_set, it);
 				if (new_go.size() > 0)
 				{
-					bool dup = false;
-					for (auto check_it : normal_family)
+					if (!setIndex[new_go])
 					{
-						if (check_it == new_go)
-						{
-							dup = true;
-							break;
-						}
-					}
-					for (auto check_it : add)
-					{
-						if (check_it == new_go)
-						{
-							dup = true;
-							break;
-						}
-					}
-					if (!dup)
+						setIndex[new_go] = ++count;
 						add.push_back(new_go);
+					}
+					int s = setIndex[new_go] - 1;
+					new_state.edge[it] = s;
+					new_state.type[it] = 3;
 				}
 			}
 			for (auto it : nonTerminalSet)
@@ -292,104 +289,32 @@ std::vector< std::vector<ExProduction> > LR1::generate_normal_family()
 				auto new_go = get_go(item_set, it);
 				if (new_go.size() > 0)
 				{
-					bool dup = false;
-					for (auto check_it : normal_family)
+					if (!setIndex[new_go])
 					{
-						if (check_it == new_go)
-						{
-							dup = true;
-							break;
-						}
-					}
-					for (auto check_it : add)
-					{
-						if (check_it == new_go)
-						{
-							dup = true;
-							break;
-						}
-					}
-					if (!dup)
+						setIndex[new_go] = ++count;
 						add.push_back(new_go);
+					}
+					int s = setIndex[new_go] - 1;
+					new_state.edge[it] = s;
+					new_state.type[it] = 4;
+
 				}
 			}
+
+			parse_table.push_back(new_state);
 		}
 		if (add.size() > 0)
 		{
 			for (auto it : add)
-				normal_family.push_back(it);
+				this->normal_family.push_back(it);
 			control = true;
 		}
 	}
 	std::cout << std::endl;
-	return normal_family;
+	return this->normal_family;
 }
 
-int Search_set(std::vector< std::vector<ExProduction> > normal_family, std::vector<ExProduction> obj)
+std::vector<State>  LR1::get_parser_table()
 {
-	int s;
-	for (s = 0; s < (int)normal_family.size(); s++)
-	{
-		if (obj == normal_family[s])
-			break;
-	}
-	return s;
-}
-std::vector<State> LR1::get_parser_table()
-{
-	std::vector<State> parse_table;
-	for (int i = 0; i < (int)normal_family.size(); i++)
-	{
-		State new_state;
-		new_state.state_exproductions = normal_family[i];
-		auto item_set = normal_family[i];
-		for (auto it : item_set)
-		{
-			if (it.get_dotPos() == it.get_bodys()[0].size())
-			{
-				if (it.get_header() == get_start_symbol())
-				{
-					new_state.edge[Grammer::Symbol("#")] = 0;
-					new_state.type[Grammer::Symbol("#")] = 1;
-				}
-				else
-				{
-					int s;
-					for (s = 0; s < (int)new_state.state_exproductions.size(); s++)
-						if (new_state.state_exproductions[s] == it)
-							break;
-					new_state.edge[it.get_tail()] = s;
-					new_state.type[it.get_tail()] = 2;
-				}
-			}
-		}
-		for (auto it : terminalSet)
-		{
-			auto new_go = get_go(item_set, it);
-			if (new_go.size() > 0)
-			{
-				int s = Search_set(normal_family, new_go);
-				if (s < (int)normal_family.size())
-				{
-					new_state.edge[it] = s;
-					new_state.type[it] = 3;
-				}
-			}
-		}
-		for (auto it : nonTerminalSet)
-		{
-			auto new_go = get_go(item_set, it);
-			if (new_go.size() > 0)
-			{
-				int s = Search_set(normal_family, new_go);
-				if (s < (int)normal_family.size())
-				{
-					new_state.edge[it] = s;
-					new_state.type[it] = 4;
-				}
-			}
-		}
-		parse_table.push_back(new_state);
-	}
-	return parse_table;
+	return this->parse_table;
 }
