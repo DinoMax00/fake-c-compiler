@@ -47,7 +47,11 @@ void Semantic::analyze(AST::node* cur)
 			cur_offset += vs.size;	//作用?
 			vs.pos = getNewTemp();
 			vs.func = "";
-			updateSymbolTable(vs);
+			if (!updateSymbolTable(vs))
+			{
+				std::cout << "ERROR: Variable " << vs.name << " Redefinition" << std::endl;
+				exit(1);
+			}
 		}
 		else if (cur->childs.size() == 6)
 			//"<Declare>", "int/void","identifier","(",  "<Formal_Para>", ")", "<Statement_Blocks>"
@@ -63,11 +67,11 @@ void Semantic::analyze(AST::node* cur)
 			if (fs.name != "main")
 			{
 				std::string func_entry = std::string("F") + std::to_string(fs.entry);
-				midcode_set.push_back(midcode(func_entry, ":", "", ""));
+				midcode_set.push_back(midcode(func_entry + ":", "", "", ""));
 			}
 			else
 			{
-				midcode_set.push_back(midcode("main", ":", "", ""));
+				midcode_set.push_back(midcode("main:", "", "", ""));
 			}
 			this->cur_function.name = fs.name;
 			analyze(cur->childs[3]);
@@ -82,10 +86,18 @@ void Semantic::analyze(AST::node* cur)
 				cur_offset += vs.size;	//作用?
 				vs.pos = getNewTemp();
 				vs.func = this->cur_function.name;
-				updateSymbolTable(vs);
-				midcode_set.push_back(midcode("POP", vs.name, "", ""));
+				if (!updateSymbolTable(vs))
+				{
+					std::cout << "ERROR: Variable " << vs.name << " Redefinition" << std::endl;
+					exit(1);
+				}
+				midcode_set.push_back(midcode("POP", "", "", "T" + std::to_string(vs.pos)));
 			}
-			updateFuncTable(fs);
+			if (!updateFuncTable(fs))
+			{
+				std::cout << "ERROR: Function " << fs.name << " Redefinition" << std::endl;
+				exit(1);
+			}
 			para_table.clear();
 			analyze(cur->childs[5]);
 			this->cur_function.name = "";
@@ -173,7 +185,11 @@ void Semantic::analyze(AST::node* cur)
 		cur_offset += vs.size;
 		vs.pos = getNewTemp();
 		vs.func = this->cur_function.name;
-		updateSymbolTable(vs);
+		if (!updateSymbolTable(vs))
+		{
+			std::cout << "ERROR: Variable " << vs.name << " Redefinition" << std::endl;
+			exit(1);
+		}
 	}
 	else if (header == "<Statement_String>")
 	{
@@ -208,11 +224,15 @@ void Semantic::analyze(AST::node* cur)
 			arg1 = std::to_string(cur->childs[2]->data);
 		std::string result;
 		vSymbol* var = findSymbol(cur->childs[0]->childs[0]->name.get_data(), this->cur_function.name);
-		if (var)
+		if (var != nullptr)
+		{
 			result = "T" + std::to_string(var->pos);
+		}
 		else
-			result = "ERROR";
-		//**需添加错误处理
+		{
+			std::cout << "ERROR: Variable " << cur->childs[0]->childs[0]->name.get_data() << " Non-existent" << std::endl;
+			exit(1);
+		}
 		midcode_set.push_back(midcode(":=", arg1, "", result));
 	}
 	else if (header == "<Statement_Return>")
@@ -241,13 +261,13 @@ void Semantic::analyze(AST::node* cur)
 		std::string jump_begin = std::string("L") + std::to_string(getNewLabel());
 		std::string jump_true = std::string("L") + std::to_string(getNewLabel());
 		std::string jump_false = std::string("L") + std::to_string(getNewLabel());
-		midcode_set.push_back(midcode(jump_begin, ":", "", ""));
+		midcode_set.push_back(midcode(jump_begin + ":", "", "", ""));
 		midcode_set.push_back(midcode("jnz", condition, "", jump_true));
 		midcode_set.push_back(midcode("j", "", "", jump_false));
-		midcode_set.push_back(midcode(jump_true, ":", "", ""));
+		midcode_set.push_back(midcode(jump_true + ":", "", "", ""));
 		analyze(cur->childs[4]);
 		midcode_set.push_back(midcode("j", "", "", jump_begin));
-		midcode_set.push_back(midcode(jump_false, ":", "", ""));
+		midcode_set.push_back(midcode(jump_false + ":", "", "", ""));
 	}
 	else if (header == "<Statement_If>")
 	{
@@ -258,9 +278,9 @@ void Semantic::analyze(AST::node* cur)
 		analyze(cur->childs[2]);
 		midcode_set.push_back(midcode("jnz", condition, "", jump_true));
 		midcode_set.push_back(midcode("j", "", "", jump_false));
-		midcode_set.push_back(midcode(jump_true, ":", "", ""));
+		midcode_set.push_back(midcode(jump_true + ":", "", "", ""));
 		analyze(cur->childs[4]);
-		midcode_set.push_back(midcode(jump_false, ":", "", ""));
+		midcode_set.push_back(midcode(jump_false + ":", "", "", ""));
 		if (cur->childs.size() == 7)
 			//"<Statement_If>", "if", "(","<Expr>",  ")", "<Statement_Blocks>","else", "<Statement_Blocks>"
 		{
@@ -373,11 +393,15 @@ void Semantic::analyze(AST::node* cur)
 			for (auto i : cur->childs)
 				analyze(i);
 			vSymbol* var = findSymbol(cur->childs[0]->childs[0]->name.get_data(), this->cur_function.name);
-			if (var)
+			if (var != nullptr)
+			{
 				cur->pos = var->pos;
+			}
 			else
-				cur->pos = 0;
-			//**需添加错误处理
+			{
+				std::cout << "ERROR: Variable " << cur->childs[0]->childs[0]->name.get_data() << " Non-existent" << std::endl;
+				exit(1);
+			}
 		}
 		else if (cur->childs.size() == 3)
 			//"<Factor>", "(","<Expr>",")"
@@ -403,6 +427,11 @@ void Semantic::analyze(AST::node* cur)
 			auto f = findFunction(func_name);
 			if (f != nullptr)
 			{
+				if (acpara_table.size() != f->paras.size())
+				{
+					std::cout << "ERROR: Parameter Mismatch in Function " << f->name << std::endl;
+					exit(1);
+				}
 				for (auto i : acpara_table)
 				{
 					std::string p = std::get<2>(i);
@@ -410,7 +439,12 @@ void Semantic::analyze(AST::node* cur)
 				}
 				std::string func_entry = "F" + std::to_string(f->entry);
 				midcode_set.push_back(midcode("Call", func_entry, "", ""));
-				midcode_set.push_back(midcode(":=", "EAX", "", result));
+				midcode_set.push_back(midcode("Pop", "", "", result));
+			}
+			else
+			{
+				std::cout << "ERROR: Function " << func_name << " Non-existent" << std::endl;
+				exit(1);
 			}
 			acpara_table.clear();
 			for (auto i : acpara_table_backup)

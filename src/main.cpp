@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--ast" << "-show the ast-tree after parser" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--ast-json" << "-show the ast-tree in json-format after parser" << std::endl;
 		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--ast-viz" << "-show the ast-tree visulization" << std::endl;
+		std::cout << std::setw(15) << std::setiosflags(std::ios::left) << "--midcode" << "-generate the midcode" << std::endl;
 
 	}
 	else if (argc == 2) {
@@ -96,14 +97,15 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (strcmp(opt, "--midcode") == 0) {
-			std::cout << "Done! See midcode.txt" << std::endl;
-			freopen("midcode.txt", "w", stdout);
+			std::cout << "semantic analyzing..." << std::endl;
 			Semantic sem;
 			sem.analyze(par.get_root());
+			freopen("midcode.txt", "w", stdout);
 			sem.print();
 			fclose(stdout);
 			freopen("CON", "w", stdout);
 			sem.print();
+			std::cout << "Done! See midcode.txt" << std::endl;
 		}
 	}
 

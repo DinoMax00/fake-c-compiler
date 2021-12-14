@@ -221,25 +221,38 @@ public:
 
 	void analyze(AST::node*);
 
+	void color_print(std::string str, int COLOR) {
+		using namespace std;
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | COLOR);
+		cout << str;
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), WHITE);
+	}
+
 	void print()
 	{
 		using std::cout;
 		for (auto i : midcode_set)
 		{
 			int format = 10 - std::get<0>(i).size();
-			cout << std::get<0>(i);
+			// cout << std::get<0>(i);
+			if (std::get<1>(i) == ":") color_print(std::get<0>(i), GREEN);
+			else color_print(std::get<0>(i), BLUE);
 			for (int i = 0; i < format; i++)
 				cout << " ";
 			format = 10 - std::get<1>(i).size();
-			cout << std::get<1>(i);
+			// cout << std::get<1>(i);
+			if (std::get<1>(i) == ":") color_print(std::get<1>(i), GREEN);
+			else color_print(std::get<1>(i), YELLOW);
 			for (int i = 0; i < format; i++)
 				cout << " ";
 			format = 10 - std::get<2>(i).size();
-			cout << std::get<2>(i);
+			// cout << std::get<2>(i);
+			color_print(std::get<2>(i), YELLOW);
 			for (int i = 0; i < format; i++)
 				cout << " ";
 			format = 10 - std::get<3>(i).size();
-			cout << std::get<3>(i);
+			// cout << std::get<3>(i);
+			color_print(std::get<3>(i), YELLOW);
 			for (int i = 0; i < format; i++)
 				cout << " ";
 			cout << std::endl;
