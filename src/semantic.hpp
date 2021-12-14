@@ -43,7 +43,7 @@ public:
 /// 函数表
 class FunctionSymbol {
 public:
-	std::string name; // 函数的标识符、
+	std::string name; // 函数的标识符
 	TokenKind type; // 返回值类型
 	std::string label; // 入口处的标签
 	std::vector<param*> params; // 形参列表
